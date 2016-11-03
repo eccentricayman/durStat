@@ -43,40 +43,29 @@ void printDir(char dirName[]) {
     struct stat buffer;
     stat(dirName, &buffer);
     int dirSize = buffer.st_size;
-    printf("Directory: %s \n Size: %s \n", dirName, humanReadableSize(dirSize));
+    printf("Directory: %s \nSize: %s \n\n", dirName, humanReadableSize(dirSize));
     printDirHelper(dirName, 0);
 }
 
 void printDirHelper(char dirName[], int nest) {
     DIR * dirStream = opendir(dirName);
-    char * tempDirName;
     struct dirent * current;
-    //get rid of the first two directories, ./ and ../
-    current = readdir(dirStream);
-    current = readdir(dirStream);
-    while (dirStream) {
-        current = readdir(dirStream);
-        if ((current -> d_type == DT_DIR) && ((strcmp(current -> d_name, ".")) || strcmp(current -> d_name, ".."))) {
+    while ((current = readdir(dirStream))) {
+        if ((!strcmp(current -> d_name, ".")) || (!strcmp(current -> d_name, ".."))) {
             for (int i = 0 ; i < nest ; i++) {
                 printf("\t");
             }
-            tempDirName = malloc(strlen(current -> d_name) + 1);
-            tempDirName = current -> d_name;
-            strcat(tempDirName, "/");
-            printf("%s \n", tempDirName);
-            free(tempDirName);
+            printf("%s/ \n", current -> d_name);
         }
         else if (current -> d_type == DT_DIR) {
             for (int i = 0 ; i < nest ; i++) {
                 printf("\t");
             }
-            // name and null terminator
-            tempDirName = malloc(strlen(current -> d_name) + 1);
-            tempDirName = current -> d_name;
-            strcat(tempDirName, "/");
-            printf("%s \n", tempDirName);
+            printf("%s/ \n", current -> d_name);
+            char * tempDirName = malloc(strlen(dirName) + strlen(current -> d_name) + 2);
+            sprintf(tempDirName, "%s/%s", dirName, current -> d_name);
+            printDirHelper(tempDirName, nest + 1);
             free(tempDirName);
-            printDirHelper(current -> d_name, nest++);
         }
         else {
             for (int i = 0 ; i < nest ; i++) {
@@ -89,6 +78,6 @@ void printDirHelper(char dirName[], int nest) {
 }
 
 int main() {
-    printDir("/Users/eccentricayman/Github/Systems/durStat");
+    printDir(".");
 }
 
